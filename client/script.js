@@ -25,7 +25,7 @@ function addTask(task, deadline, subject) {
     li.textContent = `${task} - 期限: ${deadline} - 教科: ${subject}`;
 
     const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Done';
+    deleteButton.textContent = '削除';
     deleteButton.addEventListener('click', function () {
         taskList.removeChild(li);
     });
@@ -33,3 +33,15 @@ function addTask(task, deadline, subject) {
     li.appendChild(deleteButton);
     taskList.appendChild(li);
 }
+
+// ページがロードされたときにtasks.jsonファイルを読み込む
+window.addEventListener('load', function () {
+    fetch('tasks.json')
+        .then(response => response.json())
+        .then(tasks => {
+            tasks.forEach(task => {
+                addTask(task.task, task.deadline, task.subject);
+            });
+        })
+        .catch(error => console.error('Error loading tasks:', error));
+});
