@@ -8,11 +8,11 @@ const port = 3000;
 
 app.use(bodyParser.json());
 
-// Ã“Iƒtƒ@ƒCƒ‹‚Ì’ñ‹Ÿ
+// é™çš„ãƒ•ã‚¡ã‚¤ãƒ«ã®æä¾›
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-// ƒ‹[ƒgURL‚ÉƒAƒNƒZƒX‚µ‚½‚Æ‚«‚É index.html ‚ð•Ô‚·
+// ãƒ«ãƒ¼ãƒˆURLã«ã‚¢ã‚¯ã‚»ã‚¹ã—ãŸã¨ãã« index.html ã‚’è¿”ã™
 app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
@@ -21,7 +21,7 @@ app.post('/save', (req, res) => {
     const newData = req.body;
     const filePath = path.join(__dirname, 'data.json');
 
-    // Šù‘¶‚Ìƒf[ƒ^‚ð“Ç‚Ýž‚Þ
+    // æ—¢å­˜ã®ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
     fs.readFile(filePath, 'utf8', (err, data) => {
         let existingData = [];
         if (!err) {
@@ -37,10 +37,10 @@ app.post('/save', (req, res) => {
             }
         }
 
-        // V‚µ‚¢ƒf[ƒ^‚ð’Ç‰Á
+        // æ–°ã—ã„ãƒ‡ãƒ¼ã‚¿ã‚’è¿½åŠ 
         existingData.push(newData);
 
-        // XV‚³‚ê‚½ƒf[ƒ^‚ðƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ
+        // æ›´æ–°ã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€
         fs.writeFile(filePath, JSON.stringify(existingData, null, 2), (writeErr) => {
             if (writeErr) {
                 console.error('Error writing file:', writeErr);
@@ -55,7 +55,7 @@ app.post('/save', (req, res) => {
 app.get('/load', (req, res) => {
     const filePath = path.join(__dirname, 'data.json');
 
-    // ƒtƒ@ƒCƒ‹‚©‚çƒf[ƒ^‚ð“Ç‚Ýž‚Þ
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             if (err.code === 'ENOENT') {
