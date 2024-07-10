@@ -1,23 +1,75 @@
 <!DOCTYPE html>
-<html lang="ja">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Create and Load JSON Data</title>
 </head>
-
 <body>
-    <h1>To-Do List</h1>
-    <form id="task-form">
-        <input type="text" id="task-input" placeholder="タスク">
-        <input type="date" id="deadline-input" placeholder="期限">
-        <input type="text" id="subject-input" placeholder="教科">
-        <button type="submit">タスクを追加</button>
+    <h1>Create and Load JSON Data</h1>
+    <form id="jsonDataForm">
+        <label for="task">Task:</label>
+        <input type="text" id="task" name="task" required><br><br>
+        
+        <label for="deadline">Deadline:</label>
+        <input type="date" id="deadline" name="deadline" required><br><br>
+        
+        <label for="subject">Subject:</label>
+        <input type="text" id="subject" name="subject" required><br><br>
+        
+        <button type="submit">Create JSON Data</button>
     </form>
-    <ul id="task-list"></ul>
-    <script src="script.js"></script>
-</body>
 
+    <button id="loadButton">Load Data</button>
+    <pre id="output"></pre>
+
+    <script>
+        document.getElementById('jsonDataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // フォームの値の取得
+            const task = document.getElementById('task').value;
+            const deadline = document.getElementById('deadline').value;
+            const subject = document.getElementById('subject').value;
+            
+            // JSONオブジェクトの作成
+            const jsonData = {
+                "task": task,
+                "deadline": deadline,
+                "subject": subject
+            };
+
+            // JSONを文字列に変換して表示（デバッグ用）
+            console.log(JSON.stringify(jsonData, null, 2));
+
+            // サーバーにJSONデータを送信
+            fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('loadButton').addEventListener('click', () => {
+            // サーバーからデータを取得
+            fetch('/load')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
 </html>
