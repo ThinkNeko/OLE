@@ -9,12 +9,12 @@ const port = 3000;
 app.use(bodyParser.json());
 
 // 静的ファイルの提供
-const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
+const clientPath = path.join(__dirname, '../client');
+app.use(express.static(clientPath));
 
-// ルートURLにアクセスしたときに index.html を返す
+// ルートURLにアクセスしたときに client.html を返す
 app.get('/', (req, res) => {
-    res.sendFile(path.join(publicPath, 'index.html'));
+    res.sendFile(path.join(clientPath, 'client.html'));
 });
 
 app.post('/save', (req, res) => {
@@ -52,6 +52,49 @@ app.post('/save', (req, res) => {
     });
 });
 
+app.post('/delete', (req, res) => {
+    const deleteData = req.body;
+    const filePath = path.join(__dirname, 'data.json');
+
+    // 既存のデータを読み込む
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading file:', err);
+            res.status(500).send('Error deleting data');
+            return;
+        }
+
+        let existingData;
+        try {
+            existingData = JSON.parse(data);
+            if (!Array.isArray(existingData)) {
+                existingData = [];
+            }
+        } catch (parseError) {
+            console.error('Error parsing JSON:', parseError);
+            res.status(500).send('Error deleting data');
+            return;
+        }
+
+        // 削除対象のデータをフィルタリング
+        existingData = existingData.filter(task => 
+            task.task !== deleteData.task || 
+            task.deadline !== deleteData.deadline || 
+            task.subject !== deleteData.subject
+        );
+
+        // 更新されたデータをファイルに書き込む
+        fs.writeFile(filePath, JSON.stringify(existingData, null, 2), (writeErr) => {
+            if (writeErr) {
+                console.error('Error writing file:', writeErr);
+                res.status(500).send('Error deleting data');
+            } else {
+                res.send('Data deleted from data.json');
+            }
+        });
+    });
+});
+
 app.get('/load', (req, res) => {
     const filePath = path.join(__dirname, 'data.json');
 
@@ -75,6 +118,12 @@ app.get('/load', (req, res) => {
         }
     });
 });
+
+// 初回起動時に data.json ファイルを作成
+const filePath = path.join(__dirname, 'data.json');
+if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, JSON.stringify([], null, 2));
+}
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
