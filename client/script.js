@@ -1,4 +1,4 @@
-document.getElementById('task-form').addEventListener('submit', function (event) {
+document.getElementById('task-form').addEventListener('submit', async function (event) {
     event.preventDefault();
 
     const taskInput = document.getElementById('task-input');
@@ -10,38 +10,49 @@ document.getElementById('task-form').addEventListener('submit', function (event)
     const subject = subjectInput.value;
 
     if (task && deadline && subject) {
-        addTask(task, deadline, subject);
+        await fetch('/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task, deadline, subject })
+        });
 
         taskInput.value = '';
         deadlineInput.value = '';
         subjectInput.value = '';
+
+        loadTasks();
     }
 });
 
-function addTask(task, deadline, subject) {
+async function loadTasks() {
+    const response = await fetch('/load');
+    const tasks = await response.json();
+
     const taskList = document.getElementById('task-list');
+    taskList.innerHTML = '';
+    tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.textContent = `${task.task} - 期限: ${task.deadline} - 教科: ${task.subject}`;
 
-    const li = document.createElement('li');
-    li.textContent = `${task} - 期限: ${deadline} - 教科: ${subject}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '削除';
+        deleteButton.addEventListener('click', async function () {
+            await fetch(`/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(task)
+            });
 
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = '削除';
-    deleteButton.addEventListener('click', function () {
-        taskList.removeChild(li);
+            loadTasks();
+        });
+
+        li.appendChild(deleteButton);
+        taskList.appendChild(li);
     });
-
-    li.appendChild(deleteButton);
-    taskList.appendChild(li);
 }
 
-// ページがロードされたときにtasks.jsonファイルを読み込む
-window.addEventListener('load', function () {
-    fetch('tasks.json')
-        .then(response => response.json())
-        .then(tasks => {
-            tasks.forEach(task => {
-                addTask(task.task, task.deadline, task.subject);
-            });
-        })
-        .catch(error => console.error('Error loading tasks:', error));
-});
+window.addEventListener('load', loadTasks);
