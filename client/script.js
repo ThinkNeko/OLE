@@ -15,7 +15,11 @@ document.getElementById('task-form').addEventListener('submit', async function (
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ task, deadline, subject })
+            body: JSON.stringify({
+                task,
+                deadline,
+                subject
+            })
         });
 
         taskInput.value = '';
@@ -36,21 +40,14 @@ async function loadTasks() {
         const li = document.createElement('li');
         li.textContent = `${task.task} - 期限: ${task.deadline} - 教科: ${task.subject}`;
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = '削除';
-        deleteButton.addEventListener('click', async function () {
-            await fetch(`/delete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(task)
-            });
+        const hideButton = document.createElement('button');
+        hideButton.textContent = '非表示';
 
-            loadTasks();
+        hideButton.addEventListener('click', function () {
+            li.style.display = 'none';
         });
 
-        li.appendChild(deleteButton);
+        li.appendChild(hideButton);
         taskList.appendChild(li);
     });
 }
