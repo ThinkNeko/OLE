@@ -17,6 +17,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(clientPath, 'client.html'));
 });
 
+// ルートURLにアクセスしたときに client.html を返す
+app.get('/alt', (req, res) => {
+    res.sendFile(path.join(clientPath, 'client2.html'));
+});
+
 app.post('/save', (req, res) => {
     const newData = req.body;
     const filePath = path.join(__dirname, 'data.json');
