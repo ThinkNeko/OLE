@@ -2,11 +2,22 @@ const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const path = require('path');
+const helmet = require('helmet');
+const xss = require('xss');
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'"]
+    }
+}));
 
 // 静的ファイルの提供
 const clientPath = path.join(__dirname, '../client');
@@ -17,13 +28,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(clientPath, 'client.html'));
 });
 
-// ルートURLにアクセスしたときに client.html を返す
-app.get('/alt', (req, res) => {
+// 新しいルートを追加して client2.html を返す
+app.get('/alternative', (req, res) => {
     res.sendFile(path.join(clientPath, 'client2.html'));
 });
 
 app.post('/save', (req, res) => {
-    const newData = req.body;
+    const newData = {
+        task: xss(req.body.task), // XSSエスケープ
+        deadline: xss(req.body.deadline), // XSSエスケープ
+        subject: xss(req.body.subject) // XSSエスケープ
+    };
     const filePath = path.join(__dirname, 'data.json');
 
     // 既存のデータを読み込む
@@ -58,7 +73,11 @@ app.post('/save', (req, res) => {
 });
 
 app.post('/delete', (req, res) => {
-    const deleteData = req.body;
+    const deleteData = {
+        task: xss(req.body.task), // XSSエスケープ
+        deadline: xss(req.body.deadline), // XSSエスケープ
+        subject: xss(req.body.subject) // XSSエスケープ
+    };
     const filePath = path.join(__dirname, 'data.json');
 
     // 既存のデータを読み込む
