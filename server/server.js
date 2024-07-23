@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 });
 
 // 新しいルートを追加して client2.html を返す
-app.get('/alternative', (req, res) => {
+app.get('/alt', (req, res) => {
     res.sendFile(path.join(clientPath, 'client2.html'));
 });
 
